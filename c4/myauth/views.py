@@ -1,7 +1,4 @@
-from rest_framework.request import Request
-from rest_framework.permissions import IsAuthenticated,AllowAny
-from rest_framework.decorators import api_view, permission_classes
-from django.http import JsonResponse
+from rest_framework.permissions import AllowAny
 from rest_framework import generics
 from .models import Profile,OTPRequest
 from .serializers import RegisterSerializer, RequestOtpSerializer, VerifyOtpRequestSerializer, ObtainTokenSerializer
@@ -9,10 +6,11 @@ from rest_framework import status
 from rest_framework.response import Response
 from datetime import timedelta
 from django.utils import timezone
-from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.tokens import RefreshToken
 from .sender import send_otp
 from .exceptions import *
+from drf_yasg.utils import swagger_auto_schema
+from rest_framework.decorators import action
 
 class ProfileRegisterView(generics.CreateAPIView):
     queryset = Profile.objects.all()
@@ -29,9 +27,7 @@ class OtpCreateView(generics.CreateAPIView):
         return
 
 
-
 def handle_login(data):
-    User = get_user_model()
     try:
         profile = Profile.objects.get(phone_number=data['receiver'])
         refresh = RefreshToken.for_user(profile.user)
@@ -43,9 +39,11 @@ def handle_login(data):
     
     except:
         raise UserNotExistsException
-
+    
 
 class OtpCheckView(generics.CreateAPIView):
+    @action(detail=True, methods=['POST'])
+    @swagger_auto_schema(request_body=VerifyOtpRequestSerializer,responses={200: ObtainTokenSerializer})
     def post(self, request):
         serializer = VerifyOtpRequestSerializer(data=request.data)
 
