@@ -1,4 +1,5 @@
-from rest_framework.permissions import AllowAny
+from django.http import JsonResponse
+from rest_framework.permissions import AllowAny,IsAuthenticated
 from rest_framework import generics
 from .models import Profile,OTPRequest
 from .serializers import RegisterSerializer, RequestOtpSerializer, VerifyOtpRequestSerializer, ObtainTokenSerializer
@@ -11,6 +12,12 @@ from .sender import send_otp
 from .exceptions import *
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.decorators import action
+from rest_framework.decorators import api_view, permission_classes
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated,])
+def isAuthenticated(request):
+    return JsonResponse({"detail": "ok"})
 
 class ProfileRegisterView(generics.CreateAPIView):
     queryset = Profile.objects.all()
