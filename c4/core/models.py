@@ -25,24 +25,20 @@ class Project(models.Model):
     #
 
 class Participation(models.Model):
-    profile = models.ForeignKey(Profile,on_delete=models.CASCADE)
+    profile = models.OneToOneField(Profile,on_delete=models.CASCADE)
     project = models.ForeignKey(Project,on_delete=models.CASCADE)
-    payment_status = models.BooleanField(default=False)
-    payment_accepted = models.BooleanField(default=False)
+    receipt_photo = models.ImageField(upload_to='uploads/receipt_photos/',null=True,blank=True)
+    payment_valid = models.BooleanField(default=False)
 
-    class Meta:
-        unique_together = ("profile", "project")
 
 class C4Group(models.Model):
     class C4GroupStatus(models.TextChoices):
         INPROGRESS = 'Inprogress'
         DONE = 'Done'
 
-    creator = models.ForeignKey(Profile,on_delete=models.CASCADE)
-    core1 = models.ForeignKey(Profile,on_delete=models.CASCADE,null=True,blank=True)
-    core2 = models.ForeignKey(Profile,on_delete=models.CASCADE,null=True,blank=True)
-    core3 = models.ForeignKey(Profile,on_delete=models.CASCADE,null=True,blank=True)
+    project = models.ForeignKey(Project,on_delete=models.CASCADE)
+    creator = models.OneToOneField(Profile,on_delete=models.CASCADE)
+    core1 = models.OneToOneField(Profile,on_delete=models.CASCADE,null=True,blank=True, related_name='core_one')
+    core2 = models.OneToOneField(Profile,on_delete=models.CASCADE,null=True,blank=True, related_name='core_two')
+    core3 = models.OneToOneField(Profile,on_delete=models.CASCADE,null=True,blank=True, related_name='core_three')
     status = models.CharField(max_length=20, choices=C4GroupStatus.choices, default=C4GroupStatus.INPROGRESS)
-
-    class Meta:
-        unique_together = ("creator", "core1","core2","core3")
