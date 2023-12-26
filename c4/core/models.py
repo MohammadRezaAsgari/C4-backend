@@ -1,5 +1,7 @@
 from django.db import models
 from myauth.models import Profile
+from django.dispatch import receiver
+import os
 
 class ProjectStatus(models.TextChoices):
     REGISTERATION = 'Registeration'
@@ -19,7 +21,8 @@ class Project(models.Model):
     completed_units_number = models.PositiveIntegerField()
     contractor_name = models.CharField(max_length=50)
     units_facilities = models.TextField()
-    #map
+    location_x = models.FloatField()
+    location_y = models.FloatField()
 
     @property
     def applied_people_number(self):
@@ -51,7 +54,7 @@ class Participation(models.Model):
     payment_valid = models.BooleanField(default=False)
 
     class Meta:
-        unique_together = ['project','unit']
+        unique_together = ['project','profile']
 
 class C4Group(models.Model):
     project = models.ForeignKey(Project,on_delete=models.CASCADE)
@@ -64,3 +67,27 @@ class C4Group(models.Model):
 
     class Meta:
         unique_together = ['project','unit']
+
+
+
+
+@receiver(models.signals.post_delete, sender=Participation)
+def auto_delete_file_on_delete(sender, instance, **kwargs):
+    if instance.receipt_photo:
+        if os.path.isfile(instance.receipt_photo.path):
+            os.remove(instance.receipt_photo.path)
+
+@receiver(models.signals.pre_save, sender=Participation)
+def auto_delete_file_on_change(sender, instance, **kwargs):
+    if not instance.pk:
+        return False
+
+    try:
+        old_file = Participation.objects.get(pk=instance.pk).receipt_photo
+        new_file = instance.receipt_photo
+        if not old_file == new_file:
+            if os.path.isfile(old_file.path):
+                os.remove(old_file.path)
+
+    except:
+        return False

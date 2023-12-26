@@ -39,6 +39,12 @@ class RequestOtpSerializer(serializers.ModelSerializer):
                         'receiver': {'write_only': True},
                         }
         
+    def validate(self, attrs):
+        if not Profile.objects.filter(phone_number=attrs["receiver"]).exists():
+            raise UserNotExistsException
+
+        return attrs
+        
 class VerifyOtpRequestSerializer(serializers.Serializer):
     request_id = serializers.UUIDField(required=True)
     password = serializers.CharField(max_length=4, required=True)
@@ -47,3 +53,14 @@ class VerifyOtpRequestSerializer(serializers.Serializer):
 class ObtainTokenSerializer(serializers.Serializer):
     token = serializers.CharField(max_length=128, allow_null=False)
     refresh = serializers.CharField(max_length=128, allow_null=False)
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['username', 'first_name', 'last_name']
+
+class ProfileSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+    class Meta:
+        model = Profile
+        fields = '__all__'
