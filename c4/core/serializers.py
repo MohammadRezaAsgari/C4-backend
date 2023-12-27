@@ -7,7 +7,7 @@ from myauth.serializers import ProfileSerializer
 class ProjectListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Project
-        fields = ['id', 'title','units_number','project_area','completed_units_number','applied_people_number','sold_units_number',]
+        fields = ['id', 'title','units_number','project_area','completed_units_number','sold_units_number','location_x','location_y']
 
 class ProjectRetrieveSerializer(serializers.ModelSerializer):
     class Meta:
@@ -15,7 +15,7 @@ class ProjectRetrieveSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'status', 'units_number', 'project_area', 
                   'completed_units_number', 'contractor_name', 'units_facilities', 
                   'applied_people_number','sold_units_number', 'total_invitations_sent', 
-                  'seen_invitations_number', 'paid_invitations_number','image_url']
+                  'seen_invitations_number', 'paid_invitations_number','image_url','location_x','location_y']
 
 
 class ParticipateProjectSerializer(serializers.ModelSerializer):
