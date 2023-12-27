@@ -2,9 +2,10 @@ from django.http import JsonResponse
 from rest_framework.permissions import AllowAny,IsAuthenticated
 from rest_framework import generics
 from .models import Profile,OTPRequest
-from .serializers import RegisterSerializer, RequestOtpSerializer, VerifyOtpRequestSerializer, ObtainTokenSerializer
+from .serializers import RegisterSerializer, RequestOtpSerializer, VerifyOtpRequestSerializer, ObtainTokenSerializer,ProfileSerializer
 from rest_framework import status
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from datetime import timedelta
 from django.utils import timezone
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -14,10 +15,15 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework.decorators import action
 from rest_framework.decorators import api_view, permission_classes
 
-@api_view(['GET'])
-@permission_classes([IsAuthenticated,])
-def isAuthenticated(request):
-    return JsonResponse({"detail": "ok"})
+class isAuthenticatedView(APIView):
+    permission_classes = [IsAuthenticated,]
+
+    @swagger_auto_schema(responses={200: ProfileSerializer})
+    def get(self, request):
+        profile = Profile.objects.get(user=request.user)
+        
+        return Response({**ProfileSerializer(profile).data, "detail": "ok"})
+
 
 class ProfileRegisterView(generics.CreateAPIView):
     queryset = Profile.objects.all()

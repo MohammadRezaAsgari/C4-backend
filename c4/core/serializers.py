@@ -15,7 +15,7 @@ class ProjectRetrieveSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'status', 'units_number', 'project_area', 
                   'completed_units_number', 'contractor_name', 'units_facilities', 
                   'applied_people_number','sold_units_number', 'total_invitations_sent', 
-                  'seen_invitations_number', 'paid_invitations_number']
+                  'seen_invitations_number', 'paid_invitations_number','image_url']
 
 
 class ParticipateProjectSerializer(serializers.ModelSerializer):

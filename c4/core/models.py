@@ -4,14 +4,14 @@ from django.dispatch import receiver
 import os
 
 class ProjectStatus(models.TextChoices):
-    REGISTERATION = 'Registeration'
-    FUNDRAISING = 'Fundraising'
-    CONSTRUCTION = 'Construction'
-    END = 'End'
+    REGISTERATION = 'ثبت نام'
+    FUNDRAISING = 'جذب سرمایه'
+    CONSTRUCTION = 'درحال ساخت'
+    END = 'پایان کار'
 
 class C4GroupStatus(models.TextChoices):
-    INPROGRESS = 'Inprogress'
-    DONE = 'Done'
+    INPROGRESS = 'درحال انجام'
+    DONE = 'قطعی'
 
 class Project(models.Model):
     title = models.CharField(max_length=100,unique=True)
@@ -23,6 +23,7 @@ class Project(models.Model):
     units_facilities = models.TextField()
     location_x = models.FloatField()
     location_y = models.FloatField()
+    image_url = models.URLField()
 
     @property
     def applied_people_number(self):
@@ -43,6 +44,9 @@ class Project(models.Model):
     @property
     def paid_invitations_number(self):
         return C4Group.objects.filter(project=self.id, status=C4GroupStatus.DONE).count()
+    
+    def __str__(self) -> str:
+        return self.title
 
 
 
