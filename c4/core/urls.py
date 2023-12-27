@@ -6,6 +6,5 @@ urlpatterns = [
     path('projects/<int:pk>', ProjectRetrieveView.as_view()),
     path('projects/<int:pk>/participation/', ParticipationCreateView.as_view()),
     path('participations/', ParticipationListView.as_view()),
-    path('participations/<int:pk>', ParticipationUpdateView.as_view()),
 
 ]

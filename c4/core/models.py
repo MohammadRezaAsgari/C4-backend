@@ -4,7 +4,7 @@ from django.dispatch import receiver
 import os
 
 class ProjectStatus(models.TextChoices):
-    REGISTERATION = 'ثبت نام'
+    REGISTERATION = 'درحال ثبت نام'
     FUNDRAISING = 'جذب سرمایه'
     CONSTRUCTION = 'درحال ساخت'
     END = 'پایان کار'
@@ -54,7 +54,7 @@ class Participation(models.Model):
     profile = models.OneToOneField(Profile,on_delete=models.CASCADE)
     project = models.ForeignKey(Project,on_delete=models.CASCADE)
     unit = models.PositiveIntegerField()
-    receipt_photo = models.ImageField(upload_to='uploads/receipt_photos/',null=True,blank=True)
+    receipt_photo = models.ImageField(upload_to='uploads/receipt_photos/')
     payment_valid = models.BooleanField(default=False)
 
     class Meta:

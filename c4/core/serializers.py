@@ -24,7 +24,7 @@ class ParticipateProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Participation
         fields = '__all__'
-        extra_kwargs = {'receipt_photo': {'read_only': True},
+        extra_kwargs = {
                         'payment_valid': {'read_only': True},
                         }
     

@@ -6,7 +6,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from .models import Project,C4Group,Participation
 from myauth.models import Profile
-from .exceptions import ParticipationExistsException,ParticipationOwnerException
+from .exceptions import ParticipationDoesNotExistsException, ParticipationExistsException,ParticipationOwnerException, ParticipationPaymentException
 from .serializers import ProjectListSerializer, ProjectRetrieveSerializer, ParticipateProjectSerializer, ParticipationPhotoSerializer,swagger_participation_create
 from rest_framework.permissions import AllowAny
 from drf_yasg.utils import swagger_auto_schema
@@ -56,31 +56,11 @@ class ParticipationListView(APIView):
         try:
             participation = Participation.objects.get(profile=profile)
         except Participation.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            raise ParticipationDoesNotExistsException
+
+        if not participation.payment_valid:
+            raise ParticipationPaymentException
 
         participation_serializer = ParticipateProjectSerializer(participation)
         return Response(participation_serializer.data, status=status.HTTP_200_OK)
 
-
-class ParticipationUpdateView(APIView):
-    permission_classes = [IsAuthenticated,]
-
-    @swagger_auto_schema(request_body=ParticipationPhotoSerializer,responses={200: ParticipationPhotoSerializer})
-    def patch(self, request, pk):
-        try:
-            participation = Participation.objects.get(pk=pk)
-        except Participation.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        
-        profile = Profile.objects.get(user=request.user.id)
-
-        if participation.profile != profile:
-            raise ParticipationOwnerException
-        
-        participation_serializer = ParticipationPhotoSerializer(participation,data=request.data, partial=True)
-        if participation_serializer.is_valid():
-            
-            participation_serializer.save()
-            return Response(participation_serializer.data, status=status.HTTP_200_OK)
-        else:
-            return Response(participation_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
