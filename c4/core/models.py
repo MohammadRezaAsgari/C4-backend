@@ -1,7 +1,10 @@
+import random
 from django.db import models
 from myauth.models import Profile
 from django.dispatch import receiver
+from django.db.models.signals import post_save
 import os
+from django.db.models import Q
 
 class ProjectStatus(models.TextChoices):
     REGISTERATION = 'درحال ثبت نام'
@@ -98,3 +101,50 @@ def auto_delete_file_on_change(sender, instance, **kwargs):
 
     except:
         return False
+    
+@receiver(post_save, sender=Participation)
+def handle_payment_valid_change(sender, instance, **kwargs):
+    """
+    A function to be called when the payment_valid field of a Participation instance changes.
+    """
+    if kwargs.get('update_fields') is None or 'payment_valid' in kwargs['update_fields']:
+        # The payment_valid field has been changed
+        if instance.payment_valid:
+            update_c4group(instance)
+
+def update_c4group(participation_instance):
+    profile = Profile.objects.get(id=participation_instance.profile_id)
+    filter = Q(creator = profile) | Q(core1 = profile) | Q(core2 = profile) | Q(core3 = profile)
+    try:
+        c4_groups = C4Group.objects.filter(filter,status=C4GroupStatus.INPROGRESS)
+
+        for c4_group in c4_groups:
+            creator_participation = Participation.objects.get(profile=c4_group.creator)
+            c1_participation = Participation.objects.get(profile=c4_group.core1)
+            c2_participation = Participation.objects.get(profile=c4_group.core2)
+            c3_participation = Participation.objects.get(profile=c4_group.core3)
+
+            if creator_participation.payment_valid and c1_participation.payment_valid and c2_participation.payment_valid and c3_participation.payment_valid:
+                c4_group.status = C4GroupStatus.DONE
+                unit_number = calculate_unit_number(c4_group.project_id)
+                c4_group.unit = unit_number
+                c4_group.save()
+
+                creator_participation.unit = unit_number
+                creator_participation.save()
+    except :
+        return
+    
+def calculate_unit_number(project_id):
+    project = Project.objects.get(id=project_id)
+    existing_unit_numbers = C4Group.objects.filter(project=project).values_list('unit', flat=True)
+
+    # Generate a list of available unit numbers
+    available_unit_numbers = [unit for unit in range(1, project.units_number + 1) if unit not in existing_unit_numbers]
+
+    if not available_unit_numbers:
+        raise ValueError("No available unit numbers for the project")
+
+    # Choose a random available unit number
+    chosen_unit_number = random.choice(available_unit_numbers)
+    return chosen_unit_number
