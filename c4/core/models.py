@@ -56,7 +56,7 @@ class Project(models.Model):
 class Participation(models.Model):
     profile = models.OneToOneField(Profile,on_delete=models.CASCADE)
     project = models.ForeignKey(Project,on_delete=models.CASCADE)
-    unit = models.PositiveIntegerField()
+    unit = models.PositiveIntegerField(null=True, blank=True)
     receipt_photo = models.ImageField(upload_to='uploads/receipt_photos/')
     payment_valid = models.BooleanField(default=False)
 
@@ -70,7 +70,7 @@ class C4Group(models.Model):
     core2 = models.OneToOneField(Profile,on_delete=models.CASCADE,null=True,blank=True, related_name='core_two')
     core3 = models.OneToOneField(Profile,on_delete=models.CASCADE,null=True,blank=True, related_name='core_three')
     status = models.CharField(max_length=20, choices=C4GroupStatus.choices, default=C4GroupStatus.INPROGRESS)
-    unit = models.PositiveIntegerField()
+    unit = models.PositiveIntegerField(null=True,blank=True)
 
     class Meta:
         unique_together = ['project','unit']
