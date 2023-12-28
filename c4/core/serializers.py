@@ -24,18 +24,11 @@ class ParticipateProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Participation
         fields = '__all__'
-        extra_kwargs = {
+        extra_kwargs = {'unit': {'read_only': True},
                         'payment_valid': {'read_only': True},
                         }
-    
-class ParticipationPhotoSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Participation
-        fields = ['receipt_photo']
-
     
 class swagger_participation_create(serializers.ModelSerializer):
     class Meta:
         model = Participation
-        fields = ['unit']
+        fields = ['receipt_photo']

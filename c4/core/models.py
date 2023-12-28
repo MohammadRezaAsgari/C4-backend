@@ -27,7 +27,10 @@ class Project(models.Model):
 
     @property
     def applied_people_number(self):
-        return Participation.objects.filter(project=self.id).count()
+        number = Participation.objects.filter(project=self.id).count()
+        if number == self.units_number:
+            self.status = ProjectStatus.FUNDRAISING
+        return number
     
     @property
     def sold_units_number(self):

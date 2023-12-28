@@ -4,10 +4,10 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from rest_framework.response import Response
-from .models import Project,C4Group,Participation
+from .models import Project,C4Group,Participation,ProjectStatus
 from myauth.models import Profile
-from .exceptions import ParticipationDoesNotExistsException, ParticipationExistsException,ParticipationOwnerException, ParticipationPaymentException
-from .serializers import ProjectListSerializer, ProjectRetrieveSerializer, ParticipateProjectSerializer, ParticipationPhotoSerializer,swagger_participation_create
+from .exceptions import ParticipationDoesNotExistsException, ParticipationExistsException,ProjectIsNotRegisteringException, ParticipationPaymentException
+from .serializers import ProjectListSerializer, ProjectRetrieveSerializer, ParticipateProjectSerializer, swagger_participation_create
 from rest_framework.permissions import AllowAny
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.decorators import action
@@ -33,6 +33,9 @@ class ParticipationCreateView(APIView):
         except Project.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
         
+        if project.status != ProjectStatus.REGISTERATION:
+            raise ProjectIsNotRegisteringException
+
         profile = Profile.objects.get(user=request.user.id)
 
         if Participation.objects.filter(profile=profile, project=project).exists():
@@ -42,6 +45,7 @@ class ParticipationCreateView(APIView):
         if participation_serializer.is_valid():
             
             participation_serializer.save(profile=profile, project=project)
+            project.applied_people_number()
             return Response(participation_serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(participation_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
