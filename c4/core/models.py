@@ -26,7 +26,6 @@ class Project(models.Model):
     units_facilities = models.TextField()
     location_x = models.FloatField()
     location_y = models.FloatField()
-    image_url = models.URLField()
 
     @property
     def applied_people_number(self):
@@ -37,18 +36,6 @@ class Project(models.Model):
     
     @property
     def sold_units_number(self):
-        return C4Group.objects.filter(project=self.id, status=C4GroupStatus.DONE).count()
-    
-    @property
-    def total_invitations_sent(self):
-        return C4Group.objects.filter(project=self.id).count()
-    
-    @property
-    def seen_invitations_number(self): #what's this?
-        return 
-    
-    @property
-    def paid_invitations_number(self):
         return C4Group.objects.filter(project=self.id, status=C4GroupStatus.DONE).count()
     
     def __str__(self) -> str:
@@ -65,6 +52,64 @@ class Participation(models.Model):
 
     class Meta:
         unique_together = ['project','profile']
+    
+    @property
+    def total_invitations_sent(self):
+        counter = 0
+        try:
+            c4_group = C4Group.objects.get(creator=self.profile)
+            cores = [c4_group.core1, c4_group.core2, c4_group.core3]
+
+            for core in cores:
+                if core is not None:
+                    counter += 1
+
+        except C4Group.DoesNotExist:
+            return counter
+
+        return counter
+
+    
+    @property
+    def seen_invitations_number(self):
+        counter = 0
+        try:
+            c4_group = C4Group.objects.get(creator=self.profile)
+            cores = [c4_group.core1, c4_group.core2, c4_group.core3]
+            
+            for core in cores:
+                if core is not None:
+                    try:
+                        if Participation.objects.filter(profile=core).exists():
+                            counter += 1
+                    except:
+                        continue
+                    
+
+        except C4Group.DoesNotExist:
+            return counter
+
+        return counter
+    
+    @property
+    def paid_invitations_number(self):
+        counter = 0
+        try:
+            c4_group = C4Group.objects.get(creator=self.profile)
+            cores = [c4_group.core1, c4_group.core2, c4_group.core3]
+            
+            for core in cores:
+                    try:
+                        if Participation.objects.get(profile=core).payment_valid:
+                            counter += 1
+                    except:
+                        continue
+
+        except C4Group.DoesNotExist:
+            return counter
+
+        return counter
+    
 
 class C4Group(models.Model):
     project = models.ForeignKey(Project,on_delete=models.CASCADE)

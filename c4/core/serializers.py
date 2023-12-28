@@ -17,18 +17,19 @@ class ProjectRetrieveSerializer(serializers.ModelSerializer):
         model = Project
         fields = ['id', 'title', 'status', 'units_number', 'project_area', 
                   'completed_units_number', 'contractor_name', 'units_facilities', 
-                  'applied_people_number','sold_units_number', 'total_invitations_sent', 
-                  'seen_invitations_number', 'paid_invitations_number','image_url','location_x','location_y']
+                  'applied_people_number','sold_units_number','location_x','location_y']
 
 
 class ParticipateProjectSerializer(serializers.ModelSerializer):
-    profile = ProfileSerializer(read_only=True)
-    project = ProjectRetrieveSerializer(read_only=True)
+
     class Meta:
         model = Participation
-        fields = '__all__'
+        fields = ['id', 'receipt_photo','unit', 'payment_valid', 'total_invitations_sent', 'seen_invitations_number', 'paid_invitations_number']
         extra_kwargs = {'unit': {'read_only': True},
                         'payment_valid': {'read_only': True},
+                        'total_invitations_sent': {'read_only': True},
+                        'seen_invitations_number': {'read_only': True},
+                        'paid_invitations_number': {'read_only': True},
                         }
     
 class swagger_participation_create(serializers.ModelSerializer):
