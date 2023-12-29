@@ -14,9 +14,6 @@ class ProjectAdmin(admin.ModelAdmin):
         ('Location', {
             'fields': ('location_x', 'location_y')
         }),
-        ('Additional Information', {
-            'fields': ('units_facilities')
-        }),
     )
 
 class ParticipationAdmin(admin.ModelAdmin):
