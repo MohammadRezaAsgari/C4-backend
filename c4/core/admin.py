@@ -15,7 +15,7 @@ class ProjectAdmin(admin.ModelAdmin):
             'fields': ('location_x', 'location_y')
         }),
         ('Additional Information', {
-            'fields': ('units_facilities', 'image_url')
+            'fields': ('units_facilities')
         }),
     )
 
